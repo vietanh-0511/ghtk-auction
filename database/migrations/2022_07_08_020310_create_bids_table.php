@@ -18,9 +18,10 @@ class CreateBidsTable extends Migration
             $table->bigInteger('price');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users');
-            $table->unsignedBigInteger('auction_id');
-            $table->foreign('auction_id')->references('id')->on('auctions');
+            $table->unsignedBigInteger('product_id');
+            $table->foreign('product_id')->references('id')->on('products');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

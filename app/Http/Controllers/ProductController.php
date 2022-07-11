@@ -1,8 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Enums\ProductStatus;
+use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -13,10 +17,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $a= Product::all();
+        $a = Product::all();
         return response()->json([
-            'result'=>'list Product',
-            'data'=>$a
+            'result' => 'list Product',
+            'data' => $a
         ]);
     }
 
@@ -36,9 +40,28 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        return Product::create($request->all());
+        $request->validated();
+        $productName = $request->input('product_name');
+        $userId = Auth::user()->id;
+        $price = $request->input('price');
+        $description = $request->input('description');
+        $auctionId = $request->input('auction');
+        if ($request->file('image')) {
+            $file = $request->file('image');
+            $filename = date('YmdHi') . $file->getClientOriginalName();
+            $file->move(public_path('public/img'), $filename);
+            $file = $filename;
+        }
+        return Product::create([
+            'product_name' => $productName,
+            'price' => $price,
+            'description' => $description,
+            'image' => $file,
+            'user_id' => $userId,
+            'auction_id' => $auctionId,
+        ]);
     }
 
     /**
@@ -72,7 +95,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return Product::where('id',$id)->update($request->all());
+        return Product::where('id', $id)->update($request->all());
     }
 
     /**
@@ -83,6 +106,17 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        return Product::where('id',$id)->delete();
+        return Product::where('id', $id)->delete();
+    }
+
+    public function auctionProductsList($id)
+    {
+        $auctionProducts = Product::where([
+            ['products.auction_id', $id],
+            ['products.name_active', ProductStatus::Actived]
+        ])
+            ->get();
+
+        return view('user.auction_products', ['auctionProducts' => $auctionProducts]);
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Requests\AuctionRequest;
 use App\Models\Auction;
 use Illuminate\Http\Request;
 
@@ -13,10 +15,10 @@ class AuctionController extends Controller
      */
     public function index()
     {
-        $a= Auction::all();
+        $a = Auction::all();
         return response()->json([
-            'result'=>'list auction',
-            'a'=>$a
+            'result' => 'list auction',
+            'a' => $a
         ]);
     }
 
@@ -36,8 +38,9 @@ class AuctionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(AuctionRequest $request)
     {
+        $validated = $request->validated();
         return Auction::create($request->all());
     }
 
@@ -72,7 +75,7 @@ class AuctionController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return Auction::where('id',$id)->update($request->all());
+        return Auction::where('id', $id)->update($request->all());
     }
 
     /**
@@ -81,8 +84,15 @@ class AuctionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request,$id)
+    public function destroy(Request $request, $id)
     {
-        return Auction::where('id',$id)->delete();
+        return Auction::where('id', $id)->delete();
+    }
+
+    //list auction
+    public function auctionList() // = index
+    {
+        $auctions = Auction::paginate(10);
+        return view('user.auction', ['auctions' => $auctions]);
     }
 }
