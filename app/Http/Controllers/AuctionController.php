@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AuctionRequest;
 use App\Models\Auction;
 use Illuminate\Http\Request;
+use App\Supports\Responder;
 
 class AuctionController extends Controller
 {
@@ -15,11 +16,8 @@ class AuctionController extends Controller
      */
     public function index()
     {
-        $a = Auction::all();
-        return response()->json([
-            'result' => 'list auction',
-            'a' => $a
-        ]);
+        $auctions = Auction::all();
+        return Responder::success($auctions, 'Lấy danh sách thành công');
     }
 
     /**
